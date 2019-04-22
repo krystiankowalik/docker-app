@@ -1,0 +1,36 @@
+#Run with mvn clean package && docker-compose up --build
+
+# mvn clean package && docker build -f Dockerfile.bck  --build-arg JAR_FILE=postgresapp-0.0.1-SNAPSHOT.jar -t wd45/jre8 . && docker run -it -v /home/wd45/IdeaProjects/postgresapp/target:/app -p 8080:8080 wd45/jre8
+# docker run --name pg8 -p 5432:5432 -e POSTGRES_PASSWORD=mypass -e PGDATA=/var/lib/postgresql/data/mydata -d -v /home/wd45/Documents/Docker/mount/pg_mydata:/var/lib/postgresql/data/mydata wd45/pg
+version: '2.3'
+services:
+  db:
+     image: postgres
+     volumes:
+       - /home/wd45/Documents/Docker/mount/pg_mydata:/var/lib/postgresql/data/mydata
+     ports:
+      - 5432:5432
+     environment:
+      - PGDATA=/var/lib/postgresql/data/mydata
+      - POSTGRES_PASSWORD=mypass
+     hostname: db
+     networks:
+       - network1
+
+  myapp:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        - JAR_FILE=postgresapp-0.0.1-SNAPSHOT.jar
+    image: myapp
+    ports:
+      - 8080:8080
+    hostname: app
+    networks:
+      - network1
+    depends_on:
+      - db
+
+networks:
+  network1:
